@@ -2,7 +2,12 @@
 
 ## AI-use declaration
 
-Which tools did you use, and for what?
+I used **Google Gemini** as an AI collaborator during this assignment for:
+- Reviewing and double-checking my Part A hand calculations and MDP explanations after I write them by myself on paper.
+- Helping with Python scripts for Part B (`part_b_frozenlake.py`) and Part C (`part_c_solver.py`).
+- Refining the English phrasing and formatting of my analysis in `SUBMISSION.md` based on my own observed experimental outputs.
+
+All code was executed locally in my PyCharm environment, all outputs in `outputs/` were generated from my own runs, and all calculations and conclusions were verified against the assignment specification.
 
 ## Setup and reproduction
 
@@ -15,8 +20,12 @@ python -m venv venv
 # Windows (PowerShell):
 .\venv\Scripts\Activate.ps1
 pip install gymnasium==1.4.0
+
+# Run Part B (FrozenLake simulations)
 python part_b_frozenlake.py
 
+# Run Part C (Value Iteration solver, rule checks, and simulations)
+python part_c_solver.py
 ```
 
 ## Part A — Paper calculations
@@ -77,22 +86,94 @@ In `FrozenLake-v1` (`4x4`), actions are encoded as `0 = LEFT`, `1 = DOWN`, `2 = 
 
 ### Compare code with paper
 
-Show V1 and the requested V2 values. Explain discrepancies.
+Running `part_c_solver.py` on `paper_map` reproduces the exact Part A paper results with **zero discrepancies**.
+
+**$V_1$ map (after 1 iteration):**
+
+```text
++----------+----------+----------+----------+
+|  -1.00   |  -1.00   |  10.00   | G (0.0)  |
++----------+----------+----------+----------+
+|  -1.00   |    #     |  -1.00   | H (0.0)  |
++----------+----------+----------+----------+
+|  -1.00   |  -1.00   |  -1.00   |  -1.00   |
++----------+----------+----------+----------+
+```
+
+**Requested $V_2$ values (1-indexed coordinates):**
+- **`(1,2)` `[M]`:** `V2 = 8.000000` (`Q2`: `up=-3.9000`, `right=8.0000`, `down=-3.9000`, `left=-1.9000`) — matches paper (`8.0`).
+- **`(1,3)` `[.]`:** `V2 = 10.000000` (`Q2`: `up=8.0000`, `right=10.0000`, `down=-1.9000`, `left=-3.9000`) — matches paper (`10.0`).
+- **`(2,3)` `[I]`:** `V2 = 5.210000` (`Q2`: `up=5.2100`, `right=-7.3900`, `down=-2.7100`, `left=-0.9100`) — matches paper (`5.21`).
+
+Because both the paper calculations and the solver perform synchronous Bellman backups from $V_0 = 0$ with $\gamma = 0.9$, reward-on-entry (including staying in place on blocked moves), and `0.8 / 0.1 / 0.1` slip probabilities on `I`, every $V_1$, $Q_2$, and $V_2$ value matched identically.
 
 ### Values, policies and convergence
 
-Link both value/policy maps. Record iteration counts, final value changes and tie-breaking rule.
+**Saved value/policy maps and simulation logs:**
+- Original map (`paper_map`) values and policy: [`outputs/part_c_paper_map.txt`](outputs/part_c_paper_map.txt)
+- Extended map (`extended_map`) values and policy: [`outputs/part_c_extended_map.txt`](outputs/part_c_extended_map.txt)
+- All 300 simulated episodes: [`outputs/part_c_episodes.csv`](outputs/part_c_episodes.csv)
+
+**Convergence and tie-breaking:**
+- **`paper_map`:** Converged in **12 iterations** (safeguard: `10,000`), final max $\vert{}\Delta V\vert{} = 0.000000217 < 10^{-6}$.
+- **`extended_map`:** Converged in **11 iterations** (safeguard: `10,000`), final max $\vert{}\Delta V\vert{} = 0.000000241 < 10^{-6}$.
+- **Tie-breaking rule:** If multiple actions have $Q$-values within `1e-12` of the maximum, the solver selects the first action in the deterministic order defined in `data/maps.json`: `up`, `right`, `down`, `left`. No ties occurred at convergence on either map.
+
+**`paper_map` converged $V^*$ and $\pi^*$ (`V*(S) = 1.535824`):**
+
+```text
++----------+----------+----------+----------+    +--------+--------+--------+--------+
+|  4.2000  |  8.0000  | 10.0000  | G (0.0)  |    |  .:>   |  M:>   |  .:>   |   G    |
++----------+----------+----------+----------+    +--------+--------+--------+--------+
+|  2.7800  |    #     |  5.8242  | H (0.0)  |    |  .:^   |   #    |  I:^   |   H    |
++----------+----------+----------+----------+    +--------+--------+--------+--------+
+|  1.5358  |  2.8176  |  4.2418  |  2.8176  |    |  S:>   |  .:>   |  .:^   |  .:<   |
++----------+----------+----------+----------+    +--------+--------+--------+--------+
+```
+
+**`extended_map` converged $V^*$ and $\pi^*$ (`V*(S) = 1.502000`):**
+
+```text
++----------+----------+----------+----------+    +--------+--------+--------+--------+
+|  4.2000  |  8.0000  | 10.0000  | G (0.0)  |    |  .:>   |  M:>   |  .:>   |   G    |
++----------+----------+----------+----------+    +--------+--------+--------+--------+
+|  2.7800  |    #     |  5.8242  | H (0.0)  |    |  .:^   |   #    |  I:^   |   H    |
++----------+----------+----------+----------+    +--------+--------+--------+--------+
+|  1.5020  |  2.8176  |  4.2418  |  2.8176  |    |  S:^   |  D:>   |  .:^   |  W:<   |
++----------+----------+----------+----------+    +--------+--------+--------+--------+
+```
 
 ### Simulation results
 
 | Map | Batch seed | Goals /50 | Holes /50 | Time limits /50 | Mean steps | Mean discounted return |
 | --- | --- | --- | --- | --- | --- | --- |
+| paper_map | 11 | 42 | 8 | 0 | 4.98 | 0.8913 |
+| paper_map | 22 | 46 | 4 | 0 | 5.04 | 1.9148 |
+| paper_map | 33 | 48 | 2 | 0 | 5.04 | 2.4921 |
+| extended_map | 11 | 50 | 0 | 0 | 5.00 | 1.5020 |
+| extended_map | 22 | 50 | 0 | 0 | 5.00 | 1.5020 |
+| extended_map | 33 | 50 | 0 | 0 | 5.00 | 1.5020 |
 
 ### Explain your results
 
-Which values/actions changed with sand and water? Where did cost and risk matter? How do simulations relate to the computed values?
+- **Which values and actions changed with sand (`D`) and shallow water (`W`):**
+  - Only the start tile **`S` at `(3,1)`** changed: its optimal value dropped from **`1.5358`** (`paper_map`) to **`1.5020`** (`extended_map`), and its optimal action flipped from **`right` (`>`)** to **`up` (`^`)**.
+  - On `paper_map`, the lower path through Ice `I` (`S -> (3,2) -> (3,3) -> I -> (1,3) -> G`) gives $Q^*(S, \text{right}) = -1 + 0.9 \times 2.817582 = 1.535824$, narrowly beating the deterministic upper path through Mud `M` (`S -> (2,1) -> (1,1) -> M -> (1,3) -> G`), which gives $Q^*(S, \text{up}) = -1 + 0.9(-1) + 0.9^2(-3) + 0.9^3(-1) + 0.9^4(10) = 1.502000$ by only `0.0338`.
+  - On `extended_map`, placing Sand `D` (entry reward `-2`) at `(3,2)` reduces $Q^*(S, \text{right})$ by `1.0` to `0.535824`, making the deterministic upper route via Mud (`1.502000`) strictly better. Note that $V^*(3,2)$ itself remains `2.8176` because rewards depend on the **destination** tile entered, not the tile being exited: moving from `D` into `(3,3)` still costs `-1`.
+  - Placing Shallow Water `W` (entry reward `-5`) at `(3,4)` changed **no values or actions**: from `(3,4)`, the optimal move is `left` into `(3,3)` (cost `-1`), and no optimal trajectory from any other state ever enters `(3,4)`.
+- **How the policy handled Ice (`I`) and where cost vs. risk mattered:**
+  - At `(2,3)` (`I`), the optimal action on both maps is **`up` (`^`)**, giving $V^*(2,3) = 5.8242$. Going `up` reaches `(1,3)` with probability `0.8`, bounces off wall `#` back onto `(2,3)` with probability `0.1`, and slips into Hole `H` with probability `0.1`. This yields a theoretical probability of reaching `(1,3)` (and then `G`) of $\frac{0.8}{0.8 + 0.1} = \frac{8}{9} \approx 88.89\%$ and falling into `H` of $\frac{1}{9} \approx 11.11\%$.
+  - On `paper_map`, accepting this `11.11%` hole risk yields a slightly higher expected discounted return than paying the guaranteed `-3` cost of Mud `M`. Once Sand `D` adds an extra `-1` entry cost to the lower route in `extended_map`, the risk-adjusted edge disappears and the policy avoids `I` completely from `S`, achieving `100%` goal completion (`50/50` in every batch) instead of `136/150` goals (`90.7%`) and `14/150` holes (`9.3%`) on `paper_map`.
+- **How finite-horizon simulations relate to infinite-horizon computed values:**
+  - Value iteration computes the exact **infinite-horizon expected discounted return** $V^*(S)$ from the transition model. Finite simulations estimate this expectation through Monte Carlo sampling over a capped horizon (`100` steps) and finite batch size (`50` episodes).
+  - On `extended_map`, the optimal path from `S` never visits `I`, so every episode is deterministic and finishes in `5` steps; consequently, every batch mean discounted return (`1.5020`) equals $V^*(S) = 1.502000$ exactly.
+  - On `paper_map`, stochastic slipping on `I` creates sampling variance across 50-episode batches: batch means (`0.8913`, `1.9148`, `2.4921`) fluctuate around $V^*(S) = 1.535824$ depending on how many episodes slipped into `H` (`8`, `4`, and `2` holes respectively; 150-episode overall mean `1.7661`, mean steps `5.02` vs. theoretical `5.00`). No episode hit the 100-step limit because the probability of staying on `I` for $k$ consecutive steps decays as $0.1^k$.
 
 ### Rule checks
 
-Show boundary/wall behavior, slip probabilities, floor rewards and terminal handling.
+Full verification output is saved in [`outputs/part_c_rule_checks.txt`](outputs/part_c_rule_checks.txt). All checks passed before running the solver:
 
+- **Boundary & wall behavior:** Moving `up` (map boundary) or `down` (wall `#`) from `(1,2)` (`M`) leaves the agent at `(1,2)` with probability `1.0` and applies the Mud destination reward `-3.0`.
+- **Slip probabilities:** From `(2,3)` (`I`), transition probabilities sum to `1.000000` for all four actions (`up`, `right`, `down`, `left`). For `up`, the left perpendicular slip resolves against wall `#` into staying at `(2,3)` (`p=0.1`, reward `-1.0`), while the right slip enters Hole `(2,4)` (`p=0.1`, reward `-10.0`).
+- **Floor rewards:** Entering `M` gives `-3.0`, entering `D` gives `-2.0`, entering `W` gives `-5.0`, entering `G` gives `+10.0` (with no extra floor cost), and entering `H` gives `-10.0`.
+- **Terminal handling:** Taking actions after reaching `G` or `H` keeps the agent in the terminal state with reward `0.0` (no further rewards after termination).
