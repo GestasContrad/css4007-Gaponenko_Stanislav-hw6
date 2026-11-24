@@ -1,0 +1,137 @@
+### Successful Trace
+
+Condition: is_slippery=True, policy=fixed, batch_seed=11, episode_seed=11020
+Outcome: goal, steps=14, total_reward=1.0
+============================================================
+Initial state: 0
+
+SFFF
+FHFH
+FFFH
+HFFG
+
+Step 1: state 0 --DOWN--> state 4, reward=0, terminated=False, truncated=False
+  (Down)
+SFFF
+FHFH
+FFFH
+HFFG
+
+Step 2: state 4 --DOWN--> state 4, reward=0, terminated=False, truncated=False
+  (Down)
+SFFF
+FHFH
+FFFH
+HFFG
+
+Step 3: state 4 --DOWN--> state 8, reward=0, terminated=False, truncated=False
+  (Down)
+SFFF
+FHFH
+FFFH
+HFFG
+
+Step 4: state 8 --RIGHT--> state 9, reward=0, terminated=False, truncated=False
+  (Right)
+SFFF
+FHFH
+FFFH
+HFFG
+
+Step 5: state 9 --DOWN--> state 13, reward=0, terminated=False, truncated=False
+  (Down)
+SFFF
+FHFH
+FFFH
+HFFG
+
+Step 6: state 13 --RIGHT--> state 13, reward=0, terminated=False, truncated=False
+  (Right)
+SFFF
+FHFH
+FFFH
+HFFG
+
+Step 7: state 13 --RIGHT--> state 9, reward=0, terminated=False, truncated=False
+  (Right)
+SFFF
+FHFH
+FFFH
+HFFG
+
+Step 8: state 9 --DOWN--> state 10, reward=0, terminated=False, truncated=False
+  (Down)
+SFFF
+FHFH
+FFFH
+HFFG
+
+Step 9: state 10 --DOWN--> state 9, reward=0, terminated=False, truncated=False
+  (Down)
+SFFF
+FHFH
+FFFH
+HFFG
+
+Step 10: state 9 --DOWN--> state 10, reward=0, terminated=False, truncated=False
+  (Down)
+SFFF
+FHFH
+FFFH
+HFFG
+
+Step 11: state 10 --DOWN--> state 14, reward=0, terminated=False, truncated=False
+  (Down)
+SFFF
+FHFH
+FFFH
+HFFG
+
+Step 12: state 14 --RIGHT--> state 10, reward=0, terminated=False, truncated=False
+  (Right)
+SFFF
+FHFH
+FFFH
+HFFG
+
+Step 13: state 10 --DOWN--> state 14, reward=0, terminated=False, truncated=False
+  (Down)
+SFFF
+FHFH
+FFFH
+HFFG
+
+Step 14: state 14 --RIGHT--> state 15, reward=1, terminated=True, truncated=False
+  (Right)
+SFFF
+FHFH
+FFFH
+HFFG
+
+
+### Failed Trace
+
+Condition: is_slippery=True, policy=fixed, batch_seed=11, episode_seed=11000
+Outcome: hole, steps=2, total_reward=0.0
+============================================================
+Initial state: 0
+
+SFFF
+FHFH
+FFFH
+HFFG
+
+Step 1: state 0 --DOWN--> state 1, reward=0, terminated=False, truncated=False
+  (Down)
+SFFF
+FHFH
+FFFH
+HFFG
+
+Step 2: state 1 --RIGHT--> state 5, reward=0, terminated=True, truncated=False
+  (Right)
+SFFF
+FHFH
+FFFH
+HFFG
+
